@@ -1,5 +1,5 @@
 #!/bin/bash
-# filepath: /c:/Users/NathanGalung/Documents/Kuliah/sem6/stima/Tubes/IF2211_TB1_BJB/src/alternative-bots/ecus/ecus.sh
+# filepath: /c:/Users/NathanGalung/Documents/Kuliah/sem6/stima/Tubes/IF2211_TB1_BJB/src/alternative-bots/bryan/bryan.sh
 
 echo "Checking for existing output directories..."
 if [ -d "bin" ]; then
@@ -12,10 +12,10 @@ if [ -d "obj" ]; then
   rm -rf obj
 fi
 
-echo "Building ecus bot..."
+echo "Building bryan bot..."
 dotnet build
 
-echo "Starting ecus bot..."
+echo "Starting bryan bot..."
 dotnet run --no-build
 
 echo "Bot execution complete."

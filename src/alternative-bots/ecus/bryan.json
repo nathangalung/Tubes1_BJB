@@ -2,7 +2,7 @@
   "name": "BJB-Ecus",
   "version": "1.0",
   "authors": [ "Jonathan Kenan", "Sebastian Nelson", "Bryan Hutagalung"],
-  "description": "Greedy bot using Maximum Threat Priority heuristic to identify and attack the most threatening opponents first",
+  "description": "Pencarian Posisi Optimal",
   "homepage": "https://github.com/bryanhgln/IF2211_TB1_BJB",
   "countryCodes": [ "id" ],
   "platform": ".Net 9.0",
