@@ -62,6 +62,6 @@ dotnet build IF2211_TB1_BJB.sln
 - Start a new game with the selected bots
 
 ## Authors
-- Jonathan Kenan Budianto (13522129)
-- Sebastian Nelson 
+- Jonathan Kenan Budianto (13522139)
+- Benedictus Nelson (13523150)
 - Bryan P. Hutagalung (18222130)
