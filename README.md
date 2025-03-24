@@ -39,7 +39,7 @@ The alternative bot 3 implements a **Center-Seeking and Safe Positioning Strateg
 ## Installation and Running
 1. Clone the repository
 ```
-git clone https://github.com/bryanhgln/IF2211_TB1_BJB.git
+git clone https://github.com/nathangalung/IF2211_TB1_K03_G41_BJB.git
 ```
 2. Make sure you have the Robocode Tank Royale GUI jar file in the lib directory:
 ```
