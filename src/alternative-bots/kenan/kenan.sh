@@ -1,17 +1,21 @@
-#!/bin/sh
-# This script runs the bot in development mode by default.
-# Development Mode (default): Always cleans, rebuilds, and runs.
-# Release Mode (commented out): Runs without rebuilding.
+#!/bin/bash
+# filepath: /c:/Users/NathanGalung/Documents/Kuliah/sem6/stima/Tubes/IF2211_TB1_BJB/src/alternative-bots/kenan/kenan.sh
 
-# Development mode: always rebuild
-rm -rf bin obj
+echo "Checking for existing output directories..."
+if [ -d "bin" ]; then
+  echo "Cleaning previous build outputs..."
+  rm -rf bin
+fi
+
+if [ -d "obj" ]; then
+  echo "Cleaning object files..."
+  rm -rf obj
+fi
+
+echo "Building kenan bot..."
 dotnet build
+
+echo "Starting kenan bot..."
 dotnet run --no-build
 
-# Uncomment below for release mode (runs without rebuilding)
-# if [ -d "bin" ]; then
-#   dotnet run --no-build
-# else
-#   dotnet build
-#   dotnet run --no-build
-# fi
+echo "Bot execution complete."

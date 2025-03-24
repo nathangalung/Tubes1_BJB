@@ -1,13 +1,10 @@
-
 {
-    "name": "«BJB»",
-    "version": "1.0",
-    "authors": [ "«Jonathan Kenan»", "«Sebastian Nelson»", "«Bryan Hutagalung»"],
-    "description": "Deskripsi strategi greedy yang digunakan",
-    "homepage": "«…»",
-    "countryCodes": [ "«enter your country code, e.g. id»" ],
-    "platform": "«enter programming platform, e.g. Java or .Net»",
-    "programmingLang": "C#"
-  }
-  
-  
+  "name": "BJB-Kenan",
+  "version": "1.0",
+  "authors": [ "Jonathan Kenan", "Sebastian Nelson", "Bryan Hutagalung"],
+  "description": "Greedy bot using Maximum Threat Priority heuristic to identify and attack the most threatening opponents first",
+  "homepage": "https://github.com/bryanhgln/IF2211_TB1_BJB",
+  "countryCodes": [ "id" ],
+  "platform": ".Net 9.0",
+  "programmingLang": "C# 10.0"
+}

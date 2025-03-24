@@ -1,55 +1,171 @@
+using System;
 using System.Drawing;
 using Robocode.TankRoyale.BotApi;
 using Robocode.TankRoyale.BotApi.Events;
 
-public class nelson : Bot
+public class Nelson : Bot
 {
-    // The main method starts our bot
-    static void Main(string[] args)
+    private bool movingForward = true;
+    
+    private int randomMoveCounter = 0;
+    private const int RANDOM_MOVE_INTERVAL = 30; 
+
+    private const double MARGIN = 60;
+
+    private int turnsSinceScan = 0;      
+    private const int SCAN_THRESHOLD = 20; 
+
+    private bool dodgeMode = false;
+    private int dodgeTurnsLeft = 0;
+
+    static void Main()
     {
-        new nelson().Start();
+        new Nelson().Start();
     }
 
-    // Constructor, which loads the bot config file
-    nelson() : base(BotInfo.FromFile("nelson.json")) { }
+    public Nelson() : base(BotInfo.FromFile("nelson.json")) { }
 
-    // Called when a new round is started -> initialize and do some movement
     public override void Run()
     {
+        BodyColor   = Color.Lime;
+        GunColor    = Color.Green;
+        RadarColor  = Color.DarkCyan;
+        BulletColor = Color.Yellow;
+        ScanColor   = Color.LightPink;
 
-        BodyColor = Color.FromArgb(0xFF, 0x8C, 0x00);   // Dark Orange
-        TurretColor = Color.FromArgb(0xFF, 0xA5, 0x00); // Orange
-        RadarColor = Color.FromArgb(0xFF, 0xD7, 0x00);  // Gold
-        BulletColor = Color.FromArgb(0xFF, 0x45, 0x00); // Orange-Red
-        ScanColor = Color.FromArgb(0xFF, 0xFF, 0x00);   // Bright Yellow 
-        TracksColor = Color.FromArgb(0x99, 0x33, 0x00); // Dark   
-        Brownish-Orange
-        GunColor = Color.FromArgb(0xCC, 0x55, 0x00);    // Medium Orange
-      
-        // Repeat while the bot is running
+        AdjustGunForBodyTurn   = true;
+        AdjustRadarForBodyTurn = true;
+
+        movingForward = true;
+        TargetSpeed   = 5;
+        TurnRate      = 0;
+
         while (IsRunning)
         {
-            Forward(100);
-            TurnGunRight(360);
-            Back(100);
-            TurnGunRight(360);
+            DoFallbackRadarIfLost();
+
+            StayAwayFromWalls();
+
+            randomMoveCounter++;
+            if (randomMoveCounter > RANDOM_MOVE_INTERVAL)
+            {
+                DoRandomMove();
+                randomMoveCounter = 0;  
+            }
+
+            if (dodgeMode)
+                PerformDodgeManeuver();
+
+            Go();
+            turnsSinceScan++;
         }
     }
 
-    // We saw another bot -> fire!
-    public override void OnScannedBot(ScannedBotEvent evt)
+    public override void OnScannedBot(ScannedBotEvent e)
     {
-        Fire(1);
+        turnsSinceScan = 0;
+
+        double radarBearing = RadarBearingTo(e.X, e.Y);
+
+        double overshoot = 5;
+        radarBearing += (radarBearing < 0) ? -overshoot : overshoot;
+        RadarTurnRate = Clip(radarBearing, -MaxRadarTurnRate, MaxRadarTurnRate);
+
+        double distance = DistanceTo(e.X, e.Y);
+        double firepower;
+        if (distance < 200)
+            firepower = 3.5;
+        else if (distance < 500)
+            firepower = 2.5;
+        else if (distance < 800)
+            firepower = 1.5;
+        else
+            firepower = 0.5;
+
+        if (GunHeat == 0)
+        {
+            double gunBearing = GunBearingTo(e.X, e.Y);
+            GunTurnRate = Clip(gunBearing, -MaxGunTurnRate, MaxGunTurnRate);
+
+            SetFire(firepower);
+        }
     }
 
-    // We were hit by a bullet -> turn perpendicular to the bullet
-    public override void OnHitByBullet(HitByBulletEvent evt)
+    public override void OnHitWall(HitWallEvent e)
     {
-        // Calculate the bearing to the direction of the bullet
-        var bearing = CalcBearing(evt.Bullet.Direction);
+        ReverseDirection();
+    }
 
-        // Turn 90 degrees to the bullet direction based on the bearing
-        TurnLeft(90 - bearing);
+    public override void OnHitBot(HitBotEvent e)
+    {
+        if (e.IsRammed)
+            ReverseDirection();
+    }
+
+    public override void OnHitByBullet(HitByBulletEvent e)
+    {
+        dodgeMode       = true;
+        dodgeTurnsLeft  = 15; 
+    }
+
+    private void ReverseDirection()
+    {
+        movingForward = !movingForward;
+        TargetSpeed   = (movingForward) ? 5 : -5;
+    }
+
+    private void StayAwayFromWalls()
+    {
+        if (X < MARGIN)
+            TurnRate = 10;
+        else if (X > (ArenaWidth - MARGIN))
+            TurnRate = -10;
+        else if (Y < MARGIN)
+            TurnRate = 10;
+        else if (Y > (ArenaHeight - MARGIN))
+            TurnRate = -10;
+    }
+
+    private void DoRandomMove()
+    {
+        double angle = new Random().NextDouble() * 45;     
+        double dist  = new Random().NextDouble() * 300;    
+
+        bool turnRight = (new Random().Next(2) == 0);
+        if (turnRight)
+            TurnRate = Clip(angle, -MaxTurnRate, MaxTurnRate);
+        else
+            TurnRate = Clip(-angle, -MaxTurnRate, MaxTurnRate);
+
+        movingForward = true;
+        TargetSpeed   = 5; 
+    }
+
+    private void DoFallbackRadarIfLost()
+    {
+        if (turnsSinceScan > SCAN_THRESHOLD)
+        {
+            RadarTurnRate = (RadarTurnRate >= 0) ? MaxRadarTurnRate : -MaxRadarTurnRate;
+        }
+    }
+
+    private void PerformDodgeManeuver()
+    {
+        if (dodgeTurnsLeft > 0)
+        {
+            TurnRate = (dodgeTurnsLeft % 2 == 0) ? 5 : -5;
+            dodgeTurnsLeft--;
+        }
+        else
+        {
+            dodgeMode = false;
+        }
+    }
+
+    private double Clip(double value, double min, double max)
+    {
+        if (value < min) return min;
+        if (value > max) return max;
+        return value;
     }
 }
-
